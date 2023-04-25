@@ -1,11 +1,6 @@
 ---
-- hosts: all
+- hosts: localhost
   become: true
-  vars:
-    container_count: 4
-    default_container_name: docker
-    default_container_image: ubuntu
-    default_container_command: sleep 1d
 
   tasks:
     - name: Install aptitude
@@ -43,19 +38,9 @@
         state: latest
         update_cache: true
 
-    - name: Install Docker Module for Python
-      pip:
-        name: docker
-
-    - name: Pull default Docker image
-      community.docker.docker_image:
-        name: "{{ default_container_image }}"
-        source: pull
-
-    - name: Create default containers
-      community.docker.docker_container:
-        name: "{{ default_container_name }}{{ item }}"
-        image: "{{ default_container_image }}"
-        command: "{{ default_container_command }}"
+    - name: Add user to docker group
+      user:
+        name: "{{ user }}"
         state: present
-      with_sequence: count={{ container_count }}
+        groups: docker
+        append: yes
